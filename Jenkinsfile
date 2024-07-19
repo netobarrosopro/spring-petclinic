@@ -36,7 +36,7 @@ pipeline {
         stage('Development') {
             steps {
                 script {
-                    docker.image('spring-petclinic:latest').run('-p 8080:8080')
+                    docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
                 }
             }
         }
@@ -51,8 +51,9 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    def container = docker.image('spring-petclinic:latest').run('-p 8080:8080')
-                    sh 'docker cp ${container.id}:/app /path/to/production'
+                    def container = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
+                    // Caso precise copiar arquivos do container para o host, ajuste o caminho corretamente
+                    // sh "docker cp ${container.id}:/app /path/to/production"
                 }
             }
         }
@@ -62,7 +63,7 @@ pipeline {
             script {
                 // Remover containers e imagens temporários
                 sh 'docker ps -a -q | xargs -r docker rm || true'
-                sh 'docker rmi spring-petclinic:latest || true'
+                sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
             }
         }
     }
