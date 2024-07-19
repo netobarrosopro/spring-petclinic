@@ -20,7 +20,7 @@ pipeline {
         stage('Verify Build') {
             steps {
                 script {
-                    if (!fileExists('target/spring-petclinic-1.5.1.jar')) {
+                    if (!fileExists('target/spring-petclinic-3.3.0-SNAPSHOT.jar')) {
                         error "Build failed: JAR file not found"
                     }
                 }
@@ -61,7 +61,7 @@ pipeline {
         always {
             script {
                 // Remover containers e imagens temporários
-                sh 'docker rm $(docker ps -a -q) || true'
+                sh 'docker ps -a -q | xargs -r docker rm || true'
                 sh 'docker rmi spring-petclinic:latest || true'
             }
         }
