@@ -1,32 +1,53 @@
-#!groovy
-
 pipeline {
-  agent none
-  stages {
-    stage('Maven Install') {
-      agent {
-        docker {
-          image 'maven:3.5.0'
+    agent any
+    environment {
+        DOCKER_HOST = 'tcp://172.16.255.34:2376'
+        REPO_URL = 'https://github.com/netobarrosopro/spring-petclinic.git'
+    }
+    stages {
+        stage('Clone repository') {
+            steps {
+                git branch: 'main', url: "${REPO_URL}"
+            }
         }
-      }
-      steps {
-        sh 'mvn clean install'
-      }
-    }
-    stage('Docker Build') {
-      agent any
-      steps {
-        sh 'docker build -t shanem/spring-petclinic:latest .'
-      }
-    }
-    stage('Docker Push') {
-      agent any
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'netobarroso', passwordVariable: 'DTAanmoni&&**', usernameVariable: 'antonio.barroso')]) {
-          sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-          sh 'docker push shanem/spring-petclinic:latest'
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build('spring-petclinic:latest')
+                }
+            }
         }
-      }
+        stage('Development') {
+            steps {
+                script {
+                    docker.image('spring-petclinic:latest').run('-p 8080:8080')
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                script {
+                    // Aqui você pode adicionar os comandos de teste
+                    sh 'echo "Running tests..."'
+                }
+            }
+        }
+        stage('Deploy to Production') {
+            steps {
+                script {
+                    def container = docker.image('spring-petclinic:latest').run('-p 8080:8080')
+                    sh 'docker cp ${container.id}:/app /path/to/production'
+                }
+            }
+        }
     }
-  }
+    post {
+        always {
+            script {
+                // Remover containers e imagens temporários
+                sh 'docker rm $(docker ps -a -q) || true'
+                sh 'docker rmi spring-petclinic:latest || true'
+            }
+        }
+    }
 }
