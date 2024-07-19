@@ -60,13 +60,13 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            script {
-                // Remover containers e imagens temporários
-                sh 'docker ps -a -q | xargs -r docker rm || true'
-                sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
-            }
-        }
-    }
+    //post {
+    //    always {
+    //        script {
+    //            // Remover containers e imagens temporários
+    //            sh 'docker ps -a -q | xargs -r docker rm || true'
+    //            sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
+    //        }
+    //    }
+    //}
 }
