@@ -36,7 +36,8 @@ pipeline {
         stage('Development') {
             steps {
                 script {
-                    docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
+                    def devContainer = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
+                    sh "echo 'Dev Container ID: ${devContainer.id}'"
                 }
             }
         }
@@ -51,9 +52,10 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    def container = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
+                    def prodContainer = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
+                    sh "echo 'Prod Container ID: ${prodContainer.id}'"
                     // Caso precise copiar arquivos do container para o host, ajuste o caminho corretamente
-                    // sh "docker cp ${container.id}:/app /path/to/production"
+                    // sh "docker cp ${prodContainer.id}:/app /path/to/production"
                 }
             }
         }
