@@ -10,10 +10,26 @@ pipeline {
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
+        stage('Build Project') {
+            steps {
+                script {
+                    sh './mvnw clean package -DskipTests'
+                }
+            }
+        }
+        stage('Verify Build') {
+            steps {
+                script {
+                    if (!fileExists('target/spring-petclinic-1.5.1.jar')) {
+                        error "Build failed: JAR file not found"
+                    }
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('spring-petclinic:latest')
+                    docker.build('spring-petclinic:latest', '.')
                 }
             }
         }
