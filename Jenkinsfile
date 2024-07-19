@@ -38,6 +38,8 @@ pipeline {
                 script {
                     def devContainer = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
                     sh "echo 'Dev Container ID: ${devContainer.id}'"
+                    sleep 10 // Aguarde um pouco para o container tentar iniciar
+                    sh "docker logs ${devContainer.id}"
                 }
             }
         }
@@ -54,19 +56,22 @@ pipeline {
                 script {
                     def prodContainer = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
                     sh "echo 'Prod Container ID: ${prodContainer.id}'"
+                    sleep 10 // Aguarde um pouco para o container tentar iniciar
+                    sh "docker logs ${prodContainer.id}"
                     // Caso precise copiar arquivos do container para o host, ajuste o caminho corretamente
                     // sh "docker cp ${prodContainer.id}:/app /path/to/production"
                 }
             }
         }
     }
-    //post {
-    //    always {
-    //        script {
-    //            // Remover containers e imagens temporários
-    //            sh 'docker ps -a -q | xargs -r docker rm || true'
-    //            sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
-    //        }
-    //    }
-    //}
+    // Remova ou comente a seção post para não limpar os containers e imagens após a execução
+    // post {
+    //     always {
+    //         script {
+    //             // Remover containers e imagens temporários
+    //             sh 'docker ps -a -q | xargs -r docker rm || true'
+    //             sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
+    //         }
+    //     }
+    // }
 }
