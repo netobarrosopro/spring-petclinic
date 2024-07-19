@@ -36,7 +36,10 @@ pipeline {
         stage('Development') {
             steps {
                 script {
-                    def devContainer = docker.image('spring-petclinic:latest').run('-d -p 8081:8080')
+                    // Escolha uma porta aleatória entre 8000 e 9000
+                    def port = new Random().nextInt(1000) + 8000
+                    echo "Usando a porta: ${port} para o ambiente de desenvolvimento"
+                    def devContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080")
                     sh "echo 'Dev Container ID: ${devContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${devContainer.id}"
@@ -54,7 +57,10 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    def prodContainer = docker.image('spring-petclinic:latest').run('-d -p 8080:8080')
+                    // Escolha uma porta aleatória entre 8000 e 9000
+                    def port = new Random().nextInt(1000) + 8000
+                    echo "Usando a porta: ${port} para o ambiente de produção"
+                    def prodContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080")
                     sh "echo 'Prod Container ID: ${prodContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${prodContainer.id}"
