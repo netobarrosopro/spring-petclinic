@@ -54,7 +54,7 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    def prodContainer = docker.image('spring-petclinic:latest').run('-d -p 8081:8080')
+                    def prodContainer = docker.image('spring-petclinic:latest').run('-d -p 8082:8080')
                     sh "echo 'Prod Container ID: ${prodContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${prodContainer.id}"
