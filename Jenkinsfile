@@ -11,6 +11,9 @@ pipeline {
                     // Remover containers e imagens anteriores
                     sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker rm -f || true'
                     sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
+                    // Garantir que os volumes nomeados estão criados
+                    sh 'docker volume create mysql-data || true'
+                    sh 'docker volume create postgres-data || true'
                 }
             }
         }
