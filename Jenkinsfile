@@ -5,18 +5,6 @@ pipeline {
         REPO_URL = 'https://github.com/netobarrosopro/spring-petclinic.git'
     }
     stages {
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Remover containers e imagens anteriores
-                    sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker rm -f || true'
-                    sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
-                    // Garantir que os volumes nomeados estão criados
-                    sh 'docker volume create mysql-data || true'
-                    sh 'docker volume create postgres-data || true'
-                }
-            }
-        }
         stage('Clone repository') {
             steps {
                 git branch: 'main', url: "${REPO_URL}"
@@ -42,6 +30,14 @@ pipeline {
             steps {
                 script {
                     docker.build('spring-petclinic:latest', '.')
+                }
+            }
+        }
+        stage('Stop Old Containers') {
+            steps {
+                script {
+                    // Parar os containers antigos
+                    sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker stop || true'
                 }
             }
         }
@@ -78,5 +74,24 @@ pipeline {
             }
         }
     }
-    
+    post {
+        always {
+            script {
+                // Preservar os containers antigos enquanto os novos são iniciados
+                def oldContainers = sh(script: 'docker ps -a -q --filter "name=spring-petclinic"', returnStdout: true).trim().tokenize('\n')
+                def newDevContainerId = sh(script: 'docker ps -q --filter "name=spring-petclinic-dev"', returnStdout: true).trim()
+                def newProdContainerId = sh(script: 'docker ps -q --filter "name=spring-petclinic-prod"', returnStdout: true).trim()
+
+                // Remover os containers antigos parados
+                oldContainers.each { containerId ->
+                    if (containerId != newDevContainerId && containerId != newProdContainerId) {
+                        sh "docker rm -f ${containerId}"
+                    }
+                }
+
+                // Remover imagens temporárias
+                sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
+            }
+        }
+    }
 }
