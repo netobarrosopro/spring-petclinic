@@ -75,14 +75,5 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            script {
-                // Remover containers temporários
-                sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker rm -f || true'
-                // Remover imagens temporárias
-                sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
-            }
-        }
-    }
+    
 }
