@@ -5,6 +5,15 @@ pipeline {
         REPO_URL = 'https://github.com/netobarrosopro/spring-petclinic.git'
     }
     stages {
+        stage('Cleanup') {
+            steps {
+                script {
+                    // Remover containers e imagens anteriores
+                    sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker rm -f || true'
+                    sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
+                }
+            }
+        }
         stage('Clone repository') {
             steps {
                 git branch: 'main', url: "${REPO_URL}"
@@ -36,10 +45,9 @@ pipeline {
         stage('Development') {
             steps {
                 script {
-                    // Escolha uma porta aleatória entre 8000 e 9000
                     def port = new Random().nextInt(1000) + 8000
                     echo "Usando a porta: ${port} para o ambiente de desenvolvimento"
-                    def devContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080")
+                    def devContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080 --name spring-petclinic-dev")
                     sh "echo 'Dev Container ID: ${devContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${devContainer.id}"
@@ -57,25 +65,22 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    // Escolha uma porta aleatória entre 8000 e 9000
                     def port = new Random().nextInt(1000) + 8000
                     echo "Usando a porta: ${port} para o ambiente de produção"
-                    def prodContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080")
+                    def prodContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080 --name spring-petclinic-prod")
                     sh "echo 'Prod Container ID: ${prodContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${prodContainer.id}"
-                    // Caso precise copiar arquivos do container para o host, ajuste o caminho corretamente
-                    // sh "docker cp ${prodContainer.id}:/app /path/to/production"
                 }
             }
         }
     }
-    // Remova ou comente a seção post para não limpar os containers e imagens após a execução
     post {
         always {
             script {
-                // Remover containers e imagens temporários
-                sh 'docker ps -a -q | xargs -r docker rm || true'
+                // Remover containers temporários
+                sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker rm -f || true'
+                // Remover imagens temporárias
                 sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
             }
         }
