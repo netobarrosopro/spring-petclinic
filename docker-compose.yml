@@ -11,8 +11,10 @@ services:
       - MYSQL_DATABASE=petclinic
     volumes:
       - "./conf.d:/etc/mysql/conf.d:ro"
+      - "mysql-data:/var/lib/mysql"  # Volume persistente para os dados do MySQL
     profiles:
       - mysql
+
   postgres:
     image: postgres:16.3
     ports:
@@ -21,5 +23,11 @@ services:
       - POSTGRES_PASSWORD=petclinic
       - POSTGRES_USER=petclinic
       - POSTGRES_DB=petclinic
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"  # Volume persistente para os dados do PostgreSQL
     profiles:
       - postgres
+
+volumes:
+  mysql-data:
+  postgres-data:
