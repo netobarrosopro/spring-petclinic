@@ -84,5 +84,5 @@ pipeline {
   //            sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
   //        }
   //    }
-  //}
+  }
 }
