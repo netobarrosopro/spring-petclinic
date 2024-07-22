@@ -46,6 +46,8 @@ pipeline {
                 script {
                     def port = new Random().nextInt(1000) + 8000
                     echo "Usando a porta: ${port} para o ambiente de desenvolvimento"
+                    // Remover container antigo, se existir
+                    sh 'docker ps -a -q --filter "name=spring-petclinic-dev" | xargs -r docker rm -f || true'
                     def devContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080 --name spring-petclinic-dev")
                     sh "echo 'Dev Container ID: ${devContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
@@ -66,6 +68,8 @@ pipeline {
                 script {
                     def port = new Random().nextInt(1000) + 8000
                     echo "Usando a porta: ${port} para o ambiente de produção"
+                    // Remover container antigo, se existir
+                    sh 'docker ps -a -q --filter "name=spring-petclinic-prod" | xargs -r docker rm -f || true'
                     def prodContainer = docker.image('spring-petclinic:latest').run("-d -p ${port}:8080 --name spring-petclinic-prod")
                     sh "echo 'Prod Container ID: ${prodContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
