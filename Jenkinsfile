@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    triggers {
+        githubPush()
+    }
     environment {
         DOCKER_HOST = 'tcp://172.16.255.34:2376'
         REPO_URL = 'https://github.com/netobarrosopro/spring-petclinic.git'
