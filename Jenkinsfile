@@ -87,7 +87,7 @@ pipeline {
                 def newDevContainerId = sh(script: 'docker ps -q --filter "name=spring-petclinic-dev"', returnStdout: true).trim()
                 def newProdContainerId = sh(script: 'docker ps -q --filter "name=spring-petclinic-prod"', returnStdout: true).trim()
 
-                // Remover os containers antigos parados
+                // Remover os containers antigos parados 
                 oldContainers.each { containerId ->
                     if (containerId != newDevContainerId && containerId != newProdContainerId) {
                         sh "docker rm -f ${containerId}"
