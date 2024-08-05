@@ -50,7 +50,7 @@ pipeline {
                     echo "Usando a porta: 8081 para o ambiente de desenvolvimento"
                     // Remover container antigo, se existir
                     sh 'docker ps -a -q --filter "name=spring-petclinic-dev" | xargs -r docker rm -f || true'
-                    def devContainer = docker.image('spring-petclinic:latest').run("-d -p 8081:8080 --name spring-petclinic-dev")
+                    def devContainer = docker.image('spring-petclinic:latest').run("-d -p 8081:8080 --name spring-petclinic-dev --restart unless-stopped")
                     sh "echo 'Dev Container ID: ${devContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${devContainer.id}"
@@ -71,7 +71,7 @@ pipeline {
                     echo "Usando a porta: 8080 para o ambiente de produção"
                     // Remover container antigo, se existir
                     sh 'docker ps -a -q --filter "name=spring-petclinic-prod" | xargs -r docker rm -f || true'
-                    def prodContainer = docker.image('spring-petclinic:latest').run("-d -p 8080:8080 --name spring-petclinic-prod")
+                    def prodContainer = docker.image('spring-petclinic:latest').run("-d -p 8080:8080 --name spring-petclinic-prod --restart unless-stopped")
                     sh "echo 'Prod Container ID: ${prodContainer.id}'"
                     sleep 10 // Aguarde um pouco para o container tentar iniciar
                     sh "docker logs ${prodContainer.id}"
