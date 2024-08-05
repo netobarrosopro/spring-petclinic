@@ -94,7 +94,7 @@ pipeline {
                     }
                 }
 
-                // Remover imagens temporárias
+                // Remover imagens temporárias  
                 sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
             }
         }
