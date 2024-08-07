@@ -41,6 +41,7 @@ pipeline {
                 script {
                     // Parar os containers antigos
                     sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker stop || true'
+                    sh 'docker-compose -f docker-compose.yml down || true'
                 }
             }
         }
