@@ -39,7 +39,7 @@ pipeline {
         stage('Stop Old Containers') {
             steps {
                 script {
-                    // Parar os containers antigos do dkcerfile e do dockercompose
+                    // Parar os containers antigos do dkcerfile e do docker-compose
                     sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker stop || true'
                     sh 'docker-compose -f docker-compose.yml down || true'
                 }
