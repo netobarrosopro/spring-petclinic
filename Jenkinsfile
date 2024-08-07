@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     // Parar os containers antigos
-                    sh 'docker ps -a -q --filter "name=spring-petclinic" | xargs -r docker stop || true'
+                    sh 'docker-compose -f docker-compose.yml down || true'
                 }
             }
         }
@@ -48,12 +48,8 @@ pipeline {
             steps {
                 script {
                     echo "Usando a porta: 8081 para o ambiente de desenvolvimento"
-                    // Remover container antigo, se existir
-                    sh 'docker ps -a -q --filter "name=spring-petclinic-dev" | xargs -r docker rm -f || true'
-                    def devContainer = docker.image('spring-petclinic:latest').run("-d -p 8081:8080 --name spring-petclinic-dev --restart unless-stopped")
-                    sh "echo 'Dev Container ID: ${devContainer.id}'"
-                    sleep 10 // Aguarde um pouco para o container tentar iniciar
-                    sh "docker logs ${devContainer.id}"
+                    // Substituir a imagem e iniciar contêineres com Docker Compose
+                    sh 'docker-compose -f docker-compose.dev.yml up -d'
                 }
             }
         }
@@ -69,12 +65,8 @@ pipeline {
             steps {
                 script {
                     echo "Usando a porta: 8080 para o ambiente de produção"
-                    // Remover container antigo, se existir
-                    sh 'docker ps -a -q --filter "name=spring-petclinic-prod" | xargs -r docker rm -f || true'
-                    def prodContainer = docker.image('spring-petclinic:latest').run("-d -p 8080:8080 --name spring-petclinic-prod --restart unless-stopped")
-                    sh "echo 'Prod Container ID: ${prodContainer.id}'"
-                    sleep 10 // Aguarde um pouco para o container tentar iniciar
-                    sh "docker logs ${prodContainer.id}"
+                    // Substituir a imagem e iniciar contêineres com Docker Compose
+                    sh 'docker-compose -f docker-compose.prod.yml up -d'
                 }
             }
         }
@@ -82,20 +74,8 @@ pipeline {
     post {
         always {
             script {
-                // Preservar os containers antigos enquanto os novos são iniciados
-                def oldContainers = sh(script: 'docker ps -a -q --filter "name=spring-petclinic"', returnStdout: true).trim().tokenize('\n')
-                def newDevContainerId = sh(script: 'docker ps -q --filter "name=spring-petclinic-dev"', returnStdout: true).trim()
-                def newProdContainerId = sh(script: 'docker ps -q --filter "name=spring-petclinic-prod"', returnStdout: true).trim()
-
-                // Remover os containers antigos parados 
-                oldContainers.each { containerId ->
-                    if (containerId != newDevContainerId && containerId != newProdContainerId) {
-                        sh "docker rm -f ${containerId}"
-                    }
-                }
-
-                // Remover imagens temporárias  
-                sh 'docker images -q spring-petclinic:latest | xargs -r docker rmi || true'
+                // Limpar imagens antigas não utilizadas
+                sh 'docker image prune -f'
             }
         }
     }
