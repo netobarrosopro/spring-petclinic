@@ -10,7 +10,7 @@ services:
       - MYSQL_PASSWORD=petclinic
       - MYSQL_DATABASE=petclinic
     volumes:
-      - ~/apps/mysql:/var/lib/mysql  # Volume persistente para os dados do MySQL
+      - mysql-data:/var/lib/mysql  # Volume persistente para os dados do MySQL
     profiles:
       - mysql
 
@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=petclinic
       - POSTGRES_DB=petclinic
     volumes:
-      -  pgdata:/var/lib/postgresql/data # Volume persistente para os dados do PostgreSQL
+      - postgres-data:/var/lib/postgresql/data # Volume persistente para os dados do PostgreSQL
     profiles:
       - postgres
 
